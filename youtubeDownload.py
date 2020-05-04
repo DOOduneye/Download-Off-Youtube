@@ -13,7 +13,7 @@ from sys import platform as _platform
 import socket
 
 # Playlists 
-def downloadPlaylist():
+def downloadPlaylist(link=None):
 
     # Stores array of urls 
     playlistVideoLinks = [] 
@@ -21,7 +21,7 @@ def downloadPlaylist():
     # Initalization
     while True:
         try:
-            playlistLink = input("Playlist Link: ")
+            playlistLink = link
 
             http = urllib3.PoolManager()
 
@@ -29,8 +29,6 @@ def downloadPlaylist():
             soup = BeautifulSoup(page.data, features="lxml")
             domain = 'https://www.youtube.com'
         except:
-            if(playlistLink.lower() == "exit"):
-                exit() 
             print("Something went wrong!")
             continue
         break
@@ -49,15 +47,12 @@ def downloadPlaylist():
         print("Stopping Downlaods!")
 
 # Single video
-def downloadVideo():
+def downloadVideo(link=None):
     
     #Initalization
     while True:
-        videoLink = input("Video Link: ")
+        videoLink = link
         processVideo(videoLink)
-
-        if(videoLink.lower() == "exit"):
-            exit()
         break
 
 # Downloads videos
@@ -86,7 +81,7 @@ def processVideo(link=None, isPlaylist=False):
             print("Pick: {}".format(videoResolution))
             videoResolution.clear()
 
-            reso = input("(ex. 1080p) \n >>")
+            reso = input("(ex. 1080p) \n >>" )
 
             stream = yt.streams.filter(res=reso, file_extension='mp4', progressive=True).first()
 
@@ -137,27 +132,22 @@ def defaultSave():
 # main
 def main():
     global path
-
+    
     # Initalization
     while True:
-        options = input("Do you want to download a [P]laylist or [V]ideo? (Type 'exit' at any point to quit): ")
-        if options.lower() == "v" or options.lower() == "video":
-            path = input("Copy the path where you want to save this video? (Click enter for default save): ")
-            
-            if not path:
-                defaultSave()
+        options = input("Input the link of your video or playlist! (Type 'exit' at any point to quit): ")
+        path = input("Copy the path where you want to save this video? (Click enter for default save): ")
+    
+        if not path:
+            defaultSave()
 
             Path(path).mkdir(parents=True, exist_ok=True)
-            downloadVideo()
 
-        elif options.lower() == "p" or options.lower() == "playlist":
-            path = input("Copy the path where you want to save this video? (Leave empty for default save)")
+            try: 
+                downloadVideo(options)
+            except:
+                downloadPlaylist(options)
 
-            if not path:
-                defaultSave()
-
-            Path(path).mkdir(parents=True, exist_ok=True)
-            downloadPlaylist()
         elif options.lower() == "exit":
             exit()
         else:
